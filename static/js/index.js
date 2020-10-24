@@ -1,37 +1,4 @@
 
-//---------------------------------- Credentials Section ----------------------------------//
-// All credentials come from credentials.js which isnt on github
-
-// Information needed to access the api.ai bot, only thing needed to be changed
-// Emoji Bot
-var accessToken = credentialsAccessToken;
-
-//var bot name is used for the firebase database
-var botName = credentialsBotName;
-
-var baseUrl = credentialsBaseUrl;
-
-// Initialize Firebase
-var config = credentialsConfig;
-
-// The format for config is as follows
-// Set the configuration for your app
-
-// You can get this information by creating a project and clicking connect with web or start with web
-// var config = {
-// 	apiKey: "apiKey",
-// 	authDomain: "projectId.firebaseapp.com",
-// 	databaseURL: "https://databaseName.firebaseio.com",
-// 	storageBucket: "bucket.appspot.com"
-// };
-
-
-firebase.initializeApp(config);
-
-// Key for this instance of the chat interface
-var newKey = firebase.database().ref(botName).push().key;
-console.log("Key for this chat instance = " + newKey);
-
 //---------------------------------- Main Code Area ----------------------------------//
 //  Variables to be used for storing the last message sent and recieved for the database
 var lastSentMessage = "";
@@ -150,25 +117,20 @@ function send(text) {
 
 	// update the last message sent variable to be stored in the database and store in database
 	lastSentMessage = text;
-	storeMessageToDB();
 
 
 	// AJAX post request, sends the users text to API.AI and 
 	// calls the method newReceivedMessage with the response from API.AI
 	$.ajax({
 		type: "POST",
-		url: baseUrl + "query?v=20150910",
-		contentType: "application/json; charset=utf-8",
+		url: "/sendDate",
 		dataType: "json",
-		headers: {
-			"Authorization": "Bearer " + accessToken
-		},
 		data: JSON.stringify({ query: text, lang: "en", sessionId: "somerandomthing" }),
 		success: function(data) {
             console.log(data);
 		
-		// Pass the response into the method 
-		newRecievedMessage(JSON.stringify(data.result.fulfillment.speech, undefined, 2));
+		// Pass the response into the method
+		newRecievedMessage(data["msg"]);
 
 		},
 		error: function() {
@@ -405,34 +367,6 @@ function createNewMessage(message) {
 
 
 
-//------------------------------------------- Database Write --------------------------------------------------//
-
-function storeMessageToDB() {
-  
-	var date = new Date();
-	console.log(date);
-	if (lastRecievedMessage == 1) {
- 		var storeMessage = firebase.database().ref(botName).child(newKey).push({
-    		UserResponse: lastSentMessage,
-			Time: date + ""
-		});
-  	}
-	
-	else {
-
-		var storeMessage = firebase.database().ref(botName).child(newKey).push({
-    		Question: lastRecievedMessage,
-    		UserResponse: lastSentMessage,
-			ButtonClicked: ButtonClicked,
-			Time: date + ""
-  		});
-	}
-
-}
-
-
-
-
 // Funtion which shows the typing indicator
 // As well as hides the textarea and send button
 function showLoading()
@@ -470,114 +404,6 @@ function checkVisibility(message)
 	// Scroll the view down a certain amount
 	$chatlogs.stop().animate({scrollTop: $chatlogs[0].scrollHeight});
 }
-
-
-
-
-//
-////----------------------Voice Message Methods--------------------------------//
-////Voice stuff
-//var recognition;
-//
-//function startRecognition() {
-//
-//    console.log("Start")
-//	recognition = new webkitSpeechRecognition();
-//
-//	recognition.onstart = function(event) {
-//
-//        console.log("Update");
-//		updateRec();
-//	};
-//
-//	recognition.onresult = function(event) {
-//
-//		var text = "";
-//
-//		for (var i = event.resultIndex; i < event.results.length; ++i) {
-//			text += event.results[i][0].transcript;
-//		}
-//
-//		setInput(text);
-//		stopRecognition();
-//
-//	};
-//
-//	recognition.onend = function() {
-//		stopRecognition();
-//	};
-//
-//	recognition.lang = "en-UK";
-//	recognition.start();
-//
-//}
-//
-//
-//
-//function stopRecognition() {
-//	if (recognition) {
-//        console.log("Stop Recog");
-//		recognition.stop();
-//		recognition = null;
-//	}
-//	updateRec();
-//}
-//
-//
-//
-//function switchRecognition() {
-//	if (recognition) {
-//        console.log(" Stop if");
-//		stopRecognition();
-//	} else {
-//		startRecognition();
-//	}
-//}
-//
-//
-//function setInput(text) {
-//	$(".input").val(text);
-//
-//    send(text);
-//
-//    $(".input").val("");
-//
-//}
-//
-//
-//function updateRec() {
-//
-//
-//	if (recognition) {
-//		$("#rec").attr("src", "static/images/MicrophoneOff.png");
-//	} else {
-//		$("#rec").attr("src", "static/images/microphone.png");
-//
-//	}
-//}
-//
-//function speechResponse(message)
-//{
-//
-//	var msg = new SpeechSynthesisUtterance();
-//
-//	// These lines list all of the voices which can be used in speechSynthesis
-//	//var voices = speechSynthesis.getVoices();
-//	//console.log(voices);
-//
-//
-//	msg.default = false;
-// 	msg.voiceURI = "Fiona";
-//	msg.name = "Fiona";
-//	msg.localService = true;
-//  	msg.text = message;
-//  	msg.lang = "en";
-//	msg.rate = .9;
-//	msg.volume = 1;
-//  	window.speechSynthesis.speak(msg);
-//
-//}
-
 
 
 
