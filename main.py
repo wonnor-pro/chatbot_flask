@@ -11,6 +11,10 @@ def index():
 def dev():
     return render_template("dev.html")
 
+@app.route('/home')
+def home():
+    return render_template("home.html")
+
 
 @app.route('/sendDate', methods=['GET', 'POST'])
 def form_data():
